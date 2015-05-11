@@ -178,7 +178,7 @@ public:
    }
 
    // Conversion from XYZ color space to L*a*b*
-   RGBAFloat sRGBToLxaxbx(const float gamma = 2.2) const {
+   RGBAFloat sRGBToLxaxbx(const float gamma) const {
       // Assuming that input color is in sRGB color space, but not necessarily gamma corrected
       // (e.g. from HDR format)
 
@@ -229,24 +229,30 @@ public:
       return cLxaxbx;
    }
 
-   static RGBAFloatComp DeltaE(const RGBAFloat& c1sRGB, const RGBAFloat& c2sRGB, const float gamma = 2.2) {
-      // We use the first, CIE76 version, which is just an Euclidian metric 
+   static RGBAFloatComp DeltaE(
+         const RGBAFloat& c1sRGB, 
+         const RGBAFloat& c2sRGB, 
+         const float gamma) {
+      // We use the first version (CIE76), which is just the Euclidean metric 
       // in the L*a*b* color space
 
-      RGBAFloat c1Lxaxbx = c1sRGB.sRGBToLxaxbx(gamma);
-      RGBAFloat c2Lxaxbx = c2sRGB.sRGBToLxaxbx(gamma);
+      const RGBAFloat c1Lxaxbx = c1sRGB.sRGBToLxaxbx(gamma);
+      const RGBAFloat c2Lxaxbx = c2sRGB.sRGBToLxaxbx(gamma);
 
-      RGBAFloat diffLxaxbx = c1Lxaxbx - c2Lxaxbx;
+      const RGBAFloat diffLxaxbx = c1Lxaxbx - c2Lxaxbx;
+      
+      const RGBAFloatComp deltaE = 
+         sqrt(
+              diffLxaxbx.mLx * diffLxaxbx.mLx
+            + diffLxaxbx.mAx * diffLxaxbx.mAx
+            + diffLxaxbx.mBx * diffLxaxbx.mBx);
 
-      return sqrt(
-           diffLxaxbx.mLx * diffLxaxbx.mLx
-         + diffLxaxbx.mAx * diffLxaxbx.mAx
-         + diffLxaxbx.mBx * diffLxaxbx.mBx
-         );
+      return deltaE;
    }
 
-   // XYZ and L*a*b* components added as syntactic sugar for more convenient work
    //RGBAFloatComp mR, mG, mB, mA;
+
+   // XYZ and L*a*b* components added as syntactic sugar for (hopefuly) more readable code
    union {
       RGBAFloatComp mR;
       RGBAFloatComp mX;

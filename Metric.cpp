@@ -131,10 +131,10 @@ bool Yee_Compare(CompareArgs &args)
       return false;
    }
 
-   unsigned int i, dim;
-   dim = args.ImgA->Get_Width() * args.ImgA->Get_Height();
+   unsigned int i, pixelCount;
+   pixelCount = args.ImgA->Get_Width() * args.ImgA->Get_Height();
    bool identical = true;
-   for (i = 0; i < dim; i++) {
+   for (i = 0; i < pixelCount; i++) {
       if (args.ImgA->Get(i) != args.ImgB->Get(i)) {
         identical = false;
         break;
@@ -146,19 +146,19 @@ bool Yee_Compare(CompareArgs &args)
    }
 
    // assuming colorspaces are in Adobe RGB (1998) convert to XYZ
-   float *aX = new float[dim];
-   float *aY = new float[dim];
-   float *aZ = new float[dim];
-   float *bX = new float[dim];
-   float *bY = new float[dim];
-   float *bZ = new float[dim];
-   float *aLum = new float[dim];
-   float *bLum = new float[dim];
+   float *aX = new float[pixelCount];
+   float *aY = new float[pixelCount];
+   float *aZ = new float[pixelCount];
+   float *bX = new float[pixelCount];
+   float *bY = new float[pixelCount];
+   float *bZ = new float[pixelCount];
+   float *aLum = new float[pixelCount];
+   float *bLum = new float[pixelCount];
 
-   float *aA = new float[dim];
-   float *bA = new float[dim];
-   float *aB = new float[dim];
-   float *bB = new float[dim];
+   float *aA = new float[pixelCount];
+   float *bA = new float[pixelCount];
+   float *aB = new float[pixelCount];
+   float *bB = new float[pixelCount];
 
    if (args.Verbose) printf("Converting RGB to XYZ\n");
 
@@ -335,10 +335,10 @@ bool RMSEAnalysis(CompareArgs &args)
       return false;
    }
    
-   unsigned int i, dim;
-   dim = args.ImgA->Get_Width() * args.ImgA->Get_Height();
+   unsigned int i, pixelCount;
+   pixelCount = args.ImgA->Get_Width() * args.ImgA->Get_Height();
    bool identical = true;
-   for (i = 0; i < dim; i++) {
+   for (i = 0; i < pixelCount; i++) {
       if (args.ImgA->Get(i) != args.ImgB->Get(i)) {
         identical = false;
         break;
@@ -349,10 +349,11 @@ bool RMSEAnalysis(CompareArgs &args)
       return true;
    }
 
-   // Square erros sums
-   long double seSumRed   = 0.0;
-   long double seSumGreen = 0.0;
-   long double seSumBlue  = 0.0;
+   // Squared erros sums
+   long double seSumRed   = 0.0; // squared errors sums
+   long double seSumGreen = 0.0; //
+   long double seSumBlue  = 0.0; //
+   long double sdeSum     = 0.0; // squared Delta E sum
 
    unsigned int w, h;
    w = args.ImgA->Get_Width();
@@ -375,22 +376,27 @@ bool RMSEAnalysis(CompareArgs &args)
          const float seBlue = errorBlue * errorBlue;
          seSumBlue += seBlue;
 
-         // TODO: Perceptual color difference
-         float deltaE = RGBAFloat::DeltaE(args.ImgA->Get(i), args.ImgB->Get(i));
+         // Perceptual color difference
+         const float deltaE = RGBAFloat::DeltaE(args.ImgA->Get(i), args.ImgB->Get(i), args.Gamma);
+         const float sde = deltaE * deltaE;
+         sdeSum += sde;
       }
    }
 
-   const long double mseRed   = seSumRed   / dim;
-   const long double mseGreen = seSumGreen / dim;
-   const long double mseBlue  = seSumBlue  / dim;
+   const long double mseRed   = seSumRed   / pixelCount;
+   const long double mseGreen = seSumGreen / pixelCount;
+   const long double mseBlue  = seSumBlue  / pixelCount;
+   const long double msde     = sdeSum / pixelCount;
 
    const long double rmseRed   = sqrtl(mseRed);
    const long double rmseGreen = sqrtl(mseGreen);
    const long double rmseBlue  = sqrtl(mseBlue);
+   const long double rmsde     = sqrtl(msde);
 
    printf("RMSE of red   channel: %.6f\n", rmseRed);
    printf("RMSE of green channel: %.6f\n", rmseGreen);
    printf("RMSE of blue  channel: %.6f\n", rmseBlue);
+   printf("RMSE of Delta E:       %.6f\n", rmsde);
 
    return true;
 }
