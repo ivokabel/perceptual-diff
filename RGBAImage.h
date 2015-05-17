@@ -199,9 +199,9 @@ public:
       // (Y) = [0.2126729  0.7151522  0.0721750] . (G_lin)
       // (Z)   [0.0193339  0.1191920  0.9503041]   (B_lin)
       const RGBAFloat cXYZ(
-         0.4124564 * sRGBLinear.mR + 0.3575761 * sRGBLinear.mG + 0.1804375 * sRGBLinear.mB,
-         0.2126729 * sRGBLinear.mR + 0.7151522 * sRGBLinear.mG + 0.0721750 * sRGBLinear.mB,
-         0.0193339 * sRGBLinear.mR + 0.1191920 * sRGBLinear.mG + 0.9503041 * sRGBLinear.mB,
+         0.4124564f * sRGBLinear.mR + 0.3575761f * sRGBLinear.mG + 0.1804375f * sRGBLinear.mB,
+         0.2126729f * sRGBLinear.mR + 0.7151522f * sRGBLinear.mG + 0.0721750f * sRGBLinear.mB,
+         0.0193339f * sRGBLinear.mR + 0.1191920f * sRGBLinear.mG + 0.9503041f * sRGBLinear.mB,
          sRGBLinear.mA
          );
 
